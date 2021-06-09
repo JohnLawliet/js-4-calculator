@@ -1,0 +1,107 @@
+const calculatorDisplay = document.querySelector('h1')
+const inputBtns = document.querySelectorAll('button')
+const clearBtn = document.getElementById('clear-button')
+const operation = document.getElementById('operation')
+
+let firstValue = 0;
+let operatorValue = '';
+let secondValue = 0;
+let awaitingNextValue = false
+
+const sendNumberByValue = (number) => {
+    // Replace current display value if first value is entered
+    if (awaitingNextValue) {
+        calculatorDisplay.textContent = number;
+        awaitingNextValue = false;
+    } else {
+        // If current display value is 0, replace it, if not add number to display value
+        const displayValue = calculatorDisplay.textContent;
+        calculatorDisplay.textContent = displayValue === '0' ? number : displayValue + number;
+    }
+}
+
+
+const resetAll = () => {
+    firstValue = 0;
+    operatorValue = '';
+    awaitingNextValue = false
+    operation.textContent = ''
+    calculatorDisplay.textContent = '0'
+}
+
+const addDecimal = () => {
+    // If operator pressed
+    if (awaitingNextValue)
+        return
+    // If no decimal, add one
+    if (!calculatorDisplay.textContent.includes('.')){
+        sendNumberByValue(".")
+    }
+}
+
+// Calculate values
+const calculate = (firstNumber, secondNumber, operator) => {   
+    switch(operator){
+        case '+' : return (firstNumber + secondNumber)
+        case '-' : return (firstNumber - secondNumber)
+        case '*' : return (firstNumber * secondNumber)
+        case '/' : return (firstNumber / secondNumber)
+        default : return (secondNumber) 
+    }
+}
+
+
+const useOperator = (op) => {
+    const currentValue = Number(calculatorDisplay.textContent)
+    if (!awaitingNextValue){
+        awaitingNextValue = true
+        operatorValue = op
+    }
+    console.log("operator : ",op)
+    operation.textContent = op
+    // Assign if no value
+    if (!firstValue){
+        firstValue = currentValue
+        console.log("first : ",firstValue)
+    }
+        
+    else{
+        const calculation = calculate(firstValue, currentValue, operatorValue)
+        calculatorDisplay.textContent = calculation;
+        firstValue = calculation
+        console.log("calc : ",firstValue)
+        return
+    }    
+}
+
+const saveOperator = (op) => {
+    operatorValue = op
+    awaitingNextValue = true
+}
+
+
+const confirmNumber = (op) => {
+    if (!firstValue){
+        firstValue = Number(calculatorDisplay.textContent)
+    }  
+    else{
+        secondValue = Number(calculatorDisplay.textContent)
+    }
+    saveOperator(op)
+}
+
+// Add event listener for number, decimal, ops
+inputBtns.forEach((btn) => {
+    if (btn.classList.length===0){
+        btn.addEventListener('click',() => sendNumberByValue(btn.value))
+    }
+    else if(btn.classList.contains("operator")){
+        btn.addEventListener('click',() => useOperator(btn.value))
+    }
+    else if(btn.classList.contains("decimal")){
+        btn.addEventListener('click',() => addDecimal())
+    }
+})
+
+// Event Listener
+clearBtn.addEventListener('click', resetAll);
